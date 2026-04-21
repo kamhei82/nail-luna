@@ -1,6 +1,6 @@
 /* global Phaser */
 import { Hand } from './hand.js';
-import { PALETTE, SHAPES, DECORATIONS, LENGTH_KEYS, UI } from './theme.js';
+import { PALETTE, SHAPES, DECORATIONS, LENGTH_KEYS, UI, darken } from './theme.js';
 
 const W = 960;
 const H = 640;
@@ -109,14 +109,14 @@ export class SalonScene extends Phaser.Scene {
     this.makeButton(55, 336, 35, 35, () => this.changeLength(-1));
     this.makeButton(155, 336, 35, 35, () => this.changeLength(+1));
 
-    // Color swatches: 3 cols x 4 rows
+    // Polish bottles: 3 cols x 4 rows
     this.colorButtons = [];
     PALETTE.forEach((c, i) => {
       const col = i % 3, row = Math.floor(i / 3);
       const x = 795 + col * 60;
-      const y = 170 + row * 60;
-      this.colorButtons.push({ color: c, x, y, r: 22 });
-      this.makeButton(x, y, 50, 50, () => this.pickColor(c));
+      const y = 175 + row * 62;
+      this.colorButtons.push({ color: c, x, y });
+      this.makeButton(x, y, 46, 58, () => this.pickColor(c));
     });
 
     // Decoration buttons (5, centered vertically around y=555)
@@ -318,20 +318,50 @@ export class SalonScene extends Phaser.Scene {
     const g = this.uiGfx;
     for (const b of this.colorButtons) {
       const isCurrent = this.currentColor === b.color.hex;
-      if (isCurrent) {
-        g.fillStyle(UI.accent, 0.35);
-        g.fillCircle(b.x, b.y, b.r + 6);
-        g.lineStyle(3, UI.accentDark, 1);
-        g.strokeCircle(b.x, b.y, b.r + 3);
-      }
-      g.fillStyle(b.color.hex, 1);
-      g.fillCircle(b.x, b.y, b.r);
-      g.lineStyle(1.5, 0xC97B9E, 0.6);
-      g.strokeCircle(b.x, b.y, b.r);
-      // tiny shine
-      g.fillStyle(0xFFFFFF, 0.55);
-      g.fillCircle(b.x - b.r * 0.35, b.y - b.r * 0.35, b.r * 0.22);
+      this.drawPolishBottle(g, b.x, b.y, b.color.hex, isCurrent);
     }
+  }
+
+  drawPolishBottle(g, cx, cy, color, selected) {
+    // Selection tray behind the bottle
+    if (selected) {
+      g.fillStyle(UI.accent, 0.3);
+      g.fillRoundedRect(cx - 23, cy - 29, 46, 58, 10);
+      g.lineStyle(2.5, UI.accentDark, 1);
+      g.strokeRoundedRect(cx - 23, cy - 29, 46, 58, 10);
+    }
+
+    // Cap — darker pink/rose, slightly wider than the neck
+    g.fillStyle(0x6B4E5E, 1);
+    g.fillRoundedRect(cx - 10, cy - 26, 20, 11, 3);
+    g.lineStyle(1, 0x3D2936, 0.8);
+    g.strokeRoundedRect(cx - 10, cy - 26, 20, 11, 3);
+    g.fillStyle(0xFFFFFF, 0.18);
+    g.fillRect(cx - 8, cy - 24, 16, 2);
+
+    // Neck (glass tone)
+    g.fillStyle(darken(color, 0.15), 1);
+    g.fillRect(cx - 5, cy - 15, 10, 4);
+    g.lineStyle(1, darken(color, 0.4), 0.7);
+    g.strokeRect(cx - 5, cy - 15, 10, 4);
+
+    // Bottle body
+    g.fillStyle(color, 1);
+    g.fillRoundedRect(cx - 14, cy - 12, 28, 34, 5);
+    g.lineStyle(1.3, darken(color, 0.4), 0.85);
+    g.strokeRoundedRect(cx - 14, cy - 12, 28, 34, 5);
+
+    // Glass shines
+    g.fillStyle(0xFFFFFF, 0.55);
+    g.fillRoundedRect(cx - 10, cy - 8, 3, 22, 1.5);
+    g.fillStyle(0xFFFFFF, 0.35);
+    g.fillRoundedRect(cx - 5, cy - 8, 1.5, 10, 0.7);
+
+    // Tiny label band
+    g.fillStyle(0xFFFFFF, 0.5);
+    g.fillRect(cx - 14, cy + 6, 28, 5);
+    g.lineStyle(0.8, darken(color, 0.35), 0.5);
+    g.strokeRect(cx - 14, cy + 6, 28, 5);
   }
 
   drawDecorationButtons() {
