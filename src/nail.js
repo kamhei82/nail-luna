@@ -200,15 +200,30 @@ export class Nail {
   render(g) {
     const pts = this.outline();
     const stroke = darken(this.color, 0.25);
+
+    // Soft color halo behind the nail when it's painted — gives polished
+    // nails a subtle pop against the skin.
+    if (this.painted) {
+      g.fillStyle(this.color, 0.35);
+      g.fillEllipse(this.x, this.y - this.baseHeight * LENGTH_MULT[this.lengthKey] * 0.45, this.width * 1.6, this.baseHeight * LENGTH_MULT[this.lengthKey] * 1.15);
+    }
+
     g.fillStyle(this.color, 1);
     g.fillPoints(pts, true);
     g.lineStyle(1.5, stroke, 0.9);
     g.strokePoints(pts, true);
 
+    // Lunula — subtle half-moon at the nail base, showing through the polish.
+    g.fillStyle(0xFFFFFF, 0.32);
+    g.fillEllipse(this.x, this.y - 2, this.width * 0.7, 6);
+
     // subtle shine arc near the tip
     const h = this.baseHeight * LENGTH_MULT[this.lengthKey];
-    g.fillStyle(0xFFFFFF, 0.35);
+    g.fillStyle(0xFFFFFF, 0.4);
     g.fillEllipse(this.x - this.width * 0.18, this.y - h * 0.65, this.width * 0.35, h * 0.22);
+    // tiny secondary highlight
+    g.fillStyle(0xFFFFFF, 0.25);
+    g.fillEllipse(this.x + this.width * 0.22, this.y - h * 0.35, this.width * 0.12, h * 0.1);
 
     for (const d of this.decorations) {
       DECO_RENDERERS[d.type](g, this.x + d.rx, this.y + d.ry, d.size, d.color);

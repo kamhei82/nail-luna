@@ -62,9 +62,9 @@ export class Hand {
   renderPalm(g) {
     const { cx, cy } = this;
 
-    // Cast shadow under the hand
-    g.fillStyle(0x000000, 0.08);
-    g.fillEllipse(cx + 6, cy + 245, 360, 30);
+    // Soft cast shadow onto the towel underneath
+    g.fillStyle(0x000000, 0.13);
+    g.fillEllipse(cx + 4, cy + 238, 330, 18);
 
     // Palm polygon — wider at the knuckle line, narrower toward the wrist,
     // with a little thumb-pad bump on the left.

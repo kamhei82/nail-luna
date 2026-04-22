@@ -20,8 +20,11 @@ export class SalonScene extends Phaser.Scene {
     this.currentColor = PALETTE[0].hex;
     this.applyToAll = false;
 
-    this.uiGfx = this.add.graphics();
-    this.handGfx = this.add.graphics();
+    this.bgGfx = this.add.graphics();     // back-most: decorative blobs + sparkles + towel
+    this.uiGfx = this.add.graphics();     // tool panels and buttons
+    this.handGfx = this.add.graphics();   // hand + nails (on top of towel)
+
+    this.drawBackdrop();
 
     this.add.text(W / 2, 30, 'Luna Nail Salon', {
       fontFamily: 'Quicksand, sans-serif',
@@ -195,6 +198,63 @@ export class SalonScene extends Phaser.Scene {
   }
 
   // ----- Rendering -----
+
+  drawBackdrop() {
+    const g = this.bgGfx;
+
+    // Soft pastel blobs for depth
+    g.fillStyle(0xFFC9DF, 0.32);
+    g.fillCircle(250, 130, 95);
+    g.fillStyle(0xC7CEEA, 0.28);
+    g.fillCircle(720, 120, 80);
+    g.fillStyle(0xB5EAD7, 0.28);
+    g.fillCircle(790, 430, 70);
+    g.fillStyle(0xE0BBE4, 0.25);
+    g.fillCircle(180, 420, 85);
+
+    // Salon towel / hand rest — the hand sits on this pink folded towel.
+    const cx = W / 2;
+    const towelY = 458;
+    g.fillStyle(0x000000, 0.08);
+    g.fillRoundedRect(cx - 190, towelY + 10, 380, 20, 10); // towel shadow
+    g.fillStyle(0xFFF0F5, 1);
+    g.fillRoundedRect(cx - 185, towelY, 370, 22, 11);
+    g.lineStyle(1.2, UI.panelStroke, 0.9);
+    g.strokeRoundedRect(cx - 185, towelY, 370, 22, 11);
+    // stitching line
+    g.lineStyle(0.8, UI.accent, 0.6);
+    g.strokeRoundedRect(cx - 178, towelY + 5, 356, 12, 6);
+    // little folded-corner hint on the right
+    g.fillStyle(UI.panelStroke, 0.6);
+    g.fillTriangle(cx + 170, towelY + 2, cx + 185, towelY + 2, cx + 185, towelY + 17);
+
+    // Scattered sparkles — placed in the open areas where they'll be visible.
+    const sparkles = [
+      [205, 80, 5], [320, 55, 3.5], [450, 75, 3], [560, 55, 4],
+      [660, 80, 3.5], [745, 55, 3], [240, 380, 4], [720, 200, 3.5],
+      [745, 460, 4], [220, 210, 3.5], [660, 310, 3], [300, 430, 3.5],
+      [700, 250, 3], [310, 180, 3],
+    ];
+    for (const [x, y, s] of sparkles) this.drawSparkle(g, x, y, s);
+  }
+
+  drawSparkle(g, cx, cy, size) {
+    const longArm = size;
+    const shortArm = size * 0.3;
+    g.fillStyle(0xFFFFFF, 0.9);
+    g.fillPoints([
+      { x: cx, y: cy - longArm },
+      { x: cx + shortArm, y: cy - shortArm },
+      { x: cx + longArm, y: cy },
+      { x: cx + shortArm, y: cy + shortArm },
+      { x: cx, y: cy + longArm },
+      { x: cx - shortArm, y: cy + shortArm },
+      { x: cx - longArm, y: cy },
+      { x: cx - shortArm, y: cy - shortArm },
+    ], true);
+    g.fillStyle(0xFFFFFF, 0.5);
+    g.fillCircle(cx, cy, size * 0.2);
+  }
 
   redraw() {
     this.uiGfx.clear();
